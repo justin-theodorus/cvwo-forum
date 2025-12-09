@@ -2,12 +2,14 @@ package repository
 
 import (
 	"cvwo-forum/backend/internal/models"
+
 	"github.com/jmoiron/sqlx"
 )
 
 type UserRepository struct {
 	db *sqlx.DB
 }
+
 // new user
 func NewUserRepository(db *sqlx.DB) *UserRepository {
 	return &UserRepository{db: db}
