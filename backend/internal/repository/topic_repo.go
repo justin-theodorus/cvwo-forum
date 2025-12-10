@@ -23,12 +23,18 @@ func (r *TopicRepository) Create(topic *models.Topic) error {
 	return r.db.QueryRow(query, topic.Title, topic.Description, topic.UserID).Scan(&topic.ID, &topic.CreatedAt, &topic.UpdatedAt)
 }
 
-func (r *TopicRepository) GetAll() ([]models.Topic, error) {
-	var topics []models.Topic
+func (r *TopicRepository) GetAll() ([]models.TopicWithUser, error) {
+	topics := make([]models.TopicWithUser, 0)
 	query := `
-    SELECT id, title, description, user_id, created_at, updated_at
-    FROM topics
-    ORDER BY created_at DESC `
+    SELECT t.id, t.title, t.description, t.user_id, t.created_at, t.updated_at,
+           COUNT(p.id) as posts_count,
+           u.id as "user.id", u.username as "user.username", u.email as "user.email"
+    FROM topics t
+    LEFT JOIN posts p ON t.id = p.topic_id
+    LEFT JOIN users u ON t.user_id = u.id
+    GROUP BY t.id, t.title, t.description, t.user_id, t.created_at, t.updated_at,
+             u.id, u.username, u.email
+    ORDER BY t.created_at DESC `
 	err := r.db.Select(&topics, query)
 	return topics, err
 }

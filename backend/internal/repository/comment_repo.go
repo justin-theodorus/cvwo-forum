@@ -2,9 +2,12 @@ package repository
 
 import (
 	"cvwo-forum/backend/internal/models"
+	"errors"
 
 	"github.com/jmoiron/sqlx"
 )
+
+var ErrUnauthorized = errors.New("unauthorized")
 
 type CommentRepository struct {
 	db *sqlx.DB
@@ -22,15 +25,39 @@ func (r *CommentRepository) Create(comment *models.Comment) error {
 	return r.db.QueryRow(query, comment.PostID, comment.UserID, comment.Content).Scan(&comment.ID, &comment.CreatedAt, &comment.UpdatedAt)
 }
 
-func (r *CommentRepository) GetByPostID(postID int) ([]models.Comment, error) {
-	var comments []models.Comment
+func (r *CommentRepository) GetByPostID(postID int) ([]models.CommentWithUser, error) {
+	comments := make([]models.CommentWithUser, 0)
+	query := `
+    SELECT c.id, c.post_id, c.user_id, c.content, c.created_at, c.updated_at,
+           u.id as "user.id", u.username as "user.username", u.email as "user.email"
+    FROM comments c
+    LEFT JOIN users u ON c.user_id = u.id
+    WHERE c.post_id = $1
+    ORDER BY c.created_at ASC`
+	err := r.db.Select(&comments, query, postID)
+	return comments, err
+}
+
+func (r *CommentRepository) GetByID(id int) (*models.Comment, error) {
+	var comment models.Comment
 	query := `
     SELECT id, post_id, user_id, content, created_at, updated_at
     FROM comments
-    WHERE post_id = $1
-    ORDER BY created_at ASC`
-	err := r.db.Select(&comments, query, postID)
-	return comments, err
+    WHERE id = $1`
+	err := r.db.Get(&comment, query, id)
+	return &comment, err
+}
+
+func (r *CommentRepository) GetByIDWithUser(id int) (*models.CommentWithUser, error) {
+	var comment models.CommentWithUser
+	query := `
+    SELECT c.id, c.post_id, c.user_id, c.content, c.created_at, c.updated_at,
+           u.id as "user.id", u.username as "user.username", u.email as "user.email"
+    FROM comments c
+    LEFT JOIN users u ON c.user_id = u.id
+    WHERE c.id = $1`
+	err := r.db.Get(&comment, query, id)
+	return &comment, err
 }
 
 func (r *CommentRepository) Update(comment *models.Comment) error {

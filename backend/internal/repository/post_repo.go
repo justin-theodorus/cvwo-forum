@@ -22,23 +22,31 @@ func (r *PostRepository) Create(post *models.Post) error {
 	return r.db.QueryRow(query, post.TopicID, post.UserID, post.Title, post.Content).Scan(&post.ID, &post.CreatedAt, &post.UpdatedAt)
 }
 
-func (r *PostRepository) GetByTopicID(topicID int) ([]models.Post, error) {
-	var posts []models.Post
+func (r *PostRepository) GetByTopicID(topicID int) ([]models.PostWithUser, error) {
+	posts := make([]models.PostWithUser, 0)
 	query := `
-    SELECT id, topic_id, user_id, title, content, created_at, updated_at
-    FROM posts
-    WHERE topic_id = $1
-    ORDER BY created_at DESC`
+    SELECT p.id, p.topic_id, p.user_id, p.title, p.content, p.created_at, p.updated_at,
+           u.id as "user.id", u.username as "user.username", u.email as "user.email",
+           COUNT(c.id) as comments_count
+    FROM posts p
+    LEFT JOIN users u ON p.user_id = u.id
+    LEFT JOIN comments c ON p.id = c.post_id
+    WHERE p.topic_id = $1
+    GROUP BY p.id, p.topic_id, p.user_id, p.title, p.content, p.created_at, p.updated_at,
+             u.id, u.username, u.email
+    ORDER BY p.created_at DESC`
 	err := r.db.Select(&posts, query, topicID)
 	return posts, err
 }
 
-func (r *PostRepository) GetByID(id int) (*models.Post, error) {
-	var post models.Post
+func (r *PostRepository) GetByID(id int) (*models.PostWithUser, error) {
+	var post models.PostWithUser
 	query := `
-    SELECT id, topic_id, user_id, title, content, created_at, updated_at
-    FROM posts
-    WHERE id = $1`
+    SELECT p.id, p.topic_id, p.user_id, p.title, p.content, p.created_at, p.updated_at,
+           u.id as "user.id", u.username as "user.username", u.email as "user.email"
+    FROM posts p
+    LEFT JOIN users u ON p.user_id = u.id
+    WHERE p.id = $1`
 	err := r.db.Get(&post, query, id)
 	return &post, err
 }
