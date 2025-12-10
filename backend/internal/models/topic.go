@@ -9,6 +9,7 @@ type Topic struct {
 	UserID      int       `db:"user_id" json:"userId"`
 	CreatedAt   time.Time `db:"created_at" json:"createdAt"`
 	UpdatedAt   time.Time `db:"updated_at" json:"updatedAt"`
+	PostsCount  int       `db:"posts_count" json:"postsCount,omitempty"`
 }
 
 type TopicWithUser struct {
