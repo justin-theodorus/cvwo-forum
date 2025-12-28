@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"cvwo-forum/backend/internal/services"
+	"database/sql"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -53,6 +55,7 @@ func (h *PostHandler) GetByTopicID(c *gin.Context) {
 
 	posts, err := h.forumService.GetPostsByTopicID(topicID)
 	if err != nil {
+		//log.Printf("[ERROR] GetByTopicID (topicID=%d): %v", topicID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -69,7 +72,12 @@ func (h *PostHandler) GetByID(c *gin.Context) {
 
 	post, err := h.forumService.GetPostByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "post not found"})
+		//log.Printf("[ERROR] GetPostByID (id=%d): %v", id, err)
+		if errors.Is(err, sql.ErrNoRows) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "post not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch post"})
 		return
 	}
 

@@ -29,7 +29,7 @@ func (r *CommentRepository) GetByPostID(postID int) ([]models.CommentWithUser, e
 	comments := make([]models.CommentWithUser, 0)
 	query := `
     SELECT c.id, c.post_id, c.user_id, c.content, c.created_at, c.updated_at,
-           u.id as "user.id", u.username as "user.username", u.email as "user.email"
+           u.id as "user.id", u.username as "user.username", u.email as "user.email", u.created_at as "user.created_at"
     FROM comments c
     LEFT JOIN users u ON c.user_id = u.id
     WHERE c.post_id = $1
@@ -52,7 +52,7 @@ func (r *CommentRepository) GetByIDWithUser(id int) (*models.CommentWithUser, er
 	var comment models.CommentWithUser
 	query := `
     SELECT c.id, c.post_id, c.user_id, c.content, c.created_at, c.updated_at,
-           u.id as "user.id", u.username as "user.username", u.email as "user.email"
+           u.id as "user.id", u.username as "user.username", u.email as "user.email", u.created_at as "user.created_at"
     FROM comments c
     LEFT JOIN users u ON c.user_id = u.id
     WHERE c.id = $1`

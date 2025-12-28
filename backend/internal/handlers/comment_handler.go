@@ -52,6 +52,7 @@ func (h *CommentHandler) GetByPostID(c *gin.Context) {
 
 	comments, err := h.forumService.GetCommentsByPostID(postID)
 	if err != nil {
+		//log.Printf("[ERROR] GetCommentsByPostID (postID=%d): %v", postID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

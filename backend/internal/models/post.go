@@ -15,5 +15,5 @@ type Post struct {
 
 type PostWithUser struct {
 	Post
-	User *UserResponse `json:"user,omitempty"`
+	User *UserResponse `db:"user" json:"user,omitempty"`
 }

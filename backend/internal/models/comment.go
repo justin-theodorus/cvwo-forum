@@ -13,5 +13,5 @@ type Comment struct {
 
 type CommentWithUser struct {
 	Comment
-	User *UserResponse `json:"user,omitempty"`
+	User *UserResponse `db:"user" json:"user,omitempty"`
 }

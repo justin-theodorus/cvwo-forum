@@ -28,12 +28,12 @@ func (r *TopicRepository) GetAll() ([]models.TopicWithUser, error) {
 	query := `
     SELECT t.id, t.title, t.description, t.user_id, t.created_at, t.updated_at,
            COUNT(p.id) as posts_count,
-           u.id as "user.id", u.username as "user.username", u.email as "user.email"
+           u.id as "user.id", u.username as "user.username", u.email as "user.email", u.created_at as "user.created_at"
     FROM topics t
     LEFT JOIN posts p ON t.id = p.topic_id
     LEFT JOIN users u ON t.user_id = u.id
     GROUP BY t.id, t.title, t.description, t.user_id, t.created_at, t.updated_at,
-             u.id, u.username, u.email
+             u.id, u.username, u.email, u.created_at
     ORDER BY t.created_at DESC `
 	err := r.db.Select(&topics, query)
 	return topics, err

@@ -14,5 +14,5 @@ type Topic struct {
 
 type TopicWithUser struct {
 	Topic
-	User *UserResponse `json:"user,omitempty"`
+	User *UserResponse `db:"user" json:"user,omitempty"`
 }
