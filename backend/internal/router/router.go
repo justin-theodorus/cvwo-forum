@@ -31,6 +31,7 @@ func SetupRouter(
 		{
 			auth.POST("/register", authHandler.Register)
 			auth.POST("/login", authHandler.Login)
+			auth.GET("/me", middleware.AuthMiddleware(authService), authHandler.GetCurrentUser)
 		}
 
 		topics := api.Group("/topics")
@@ -40,6 +41,8 @@ func SetupRouter(
 			topics.GET("/:id/posts", postHandler.GetByTopicID)
 
 			topics.POST("", middleware.AuthMiddleware(authService), topicHandler.Create)
+			topics.PUT("/:id", middleware.AuthMiddleware(authService), topicHandler.Update)
+			topics.DELETE("/:id", middleware.AuthMiddleware(authService), topicHandler.Delete)
 		}
 
 		posts := api.Group("/posts")
@@ -48,11 +51,15 @@ func SetupRouter(
 			posts.GET("/:id/comments", commentHandler.GetByPostID)
 
 			posts.POST("", middleware.AuthMiddleware(authService), postHandler.Create)
+			posts.PUT("/:id", middleware.AuthMiddleware(authService), postHandler.Update)
+			posts.DELETE("/:id", middleware.AuthMiddleware(authService), postHandler.Delete)
 		}
 
 		comments := api.Group("/comments")
 		{
 			comments.POST("", middleware.AuthMiddleware(authService), commentHandler.Create)
+			comments.PUT("/:id", middleware.AuthMiddleware(authService), commentHandler.Update)
+			comments.DELETE("/:id", middleware.AuthMiddleware(authService), commentHandler.Delete)
 		}
 	}
 
