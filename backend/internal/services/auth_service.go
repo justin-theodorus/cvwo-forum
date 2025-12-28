@@ -105,3 +105,7 @@ func (s *AuthService) ValidateToken(tokenString string) (int, error) {
 
 	return 0, errors.New("invalid token")
 }
+
+func (s *AuthService) GetUserByID(id int) (*models.User, error) {
+	return s.userRepo.GetByID(id)
+}
