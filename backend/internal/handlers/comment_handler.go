@@ -58,3 +58,57 @@ func (h *CommentHandler) GetByPostID(c *gin.Context) {
 
 	c.JSON(http.StatusOK, comments)
 }
+
+type UpdateCommentRequest struct {
+	Content string `json:"content"`
+}
+
+func (h *CommentHandler) Update(c *gin.Context) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid comment id"})
+		return
+	}
+
+	var req UpdateCommentRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	comment, err := h.forumService.UpdateComment(id, userID.(int), req.Content)
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": "cannot update this comment"})
+		return
+	}
+
+	c.JSON(http.StatusOK, comment)
+}
+
+func (h *CommentHandler) Delete(c *gin.Context) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid comment id"})
+		return
+	}
+
+	err = h.forumService.DeleteComment(id, userID.(int))
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": "cannot delete this comment"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "comment deleted"})
+}

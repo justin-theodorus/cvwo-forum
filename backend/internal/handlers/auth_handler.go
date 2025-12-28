@@ -63,3 +63,19 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		"user":  user.ToResponse(),
 	})
 }
+
+func (h *AuthHandler) GetCurrentUser(c *gin.Context) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	user, err := h.authService.GetUserByID(userID.(int))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, user.ToResponse())
+}

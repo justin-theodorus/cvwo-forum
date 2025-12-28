@@ -75,3 +75,58 @@ func (h *PostHandler) GetByID(c *gin.Context) {
 
 	c.JSON(http.StatusOK, post)
 }
+
+type UpdatePostRequest struct {
+	Title   string `json:"title"`
+	Content string `json:"content"`
+}
+
+func (h *PostHandler) Update(c *gin.Context) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid post id"})
+		return
+	}
+
+	var req UpdatePostRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	post, err := h.forumService.UpdatePost(id, userID.(int), req.Title, req.Content)
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": "cannot update this post"})
+		return
+	}
+
+	c.JSON(http.StatusOK, post)
+}
+
+func (h *PostHandler) Delete(c *gin.Context) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid post id"})
+		return
+	}
+
+	err = h.forumService.DeletePost(id, userID.(int))
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": "cannot delete this post"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "post deleted"})
+}
