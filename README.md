@@ -134,7 +134,7 @@ The application uses **PostgreSQL** hosted on **Supabase**.
 - **comments**: User comments on posts (with nested reply support)
 
 ### ⚠️ Important Note
-The Supabase database may be **paused due to inactivity**. If the application is not working properly or showing database connection errors, this is likely the cause. The database can only be resumed manually.
+The Supabase database may be **paused due to inactivity**. If the application is not working properly or showing database connection errors, this is likely the cause. The database can only be resumed manually. Please contact me through telegram (@aduidk) if you need me to resume the database.
 
 ## API Endpoints
 
